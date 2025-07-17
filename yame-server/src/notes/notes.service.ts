@@ -17,9 +17,9 @@ export class NotesService {
     user: User,
   ) {
     const newNote = new Note();
-    newNote.title = createNoteDto.title;
-    newNote.content = createNoteDto.content;
-    newNote.status = createNoteDto.status;
+    newNote.title = createNoteDto?.title || "";
+    newNote.content = createNoteDto?.content || "";
+    newNote.status = createNoteDto?.status || "DRAFT";
 
     newNote.userId = user.id;
     newNote.user = user;
@@ -35,8 +35,9 @@ export class NotesService {
   }
 
   async findAll(userId: number) {
-    return await this.noteRepo.findAndCount({
+    return await this.noteRepo.find({
       where: { userId },
+      order: { createdAt: 'DESC' },
       select: { id: true, title: true, status: true },
     });
   }
@@ -44,7 +45,7 @@ export class NotesService {
   async findOne(id: number, userId: number) {
     const notes = await this.noteRepo.find({
       where: { id, userId },
-      select: { id: true, title: true, status: true },
+      select: { id: true, title: true, status: true, content: true },
     });
 
     return notes[0];
@@ -75,7 +76,8 @@ export class NotesService {
     };
   }
 
-  // remove(id: number) {
-  //   return `This action removes a #${id} note`;
-  // }
+  async remove(id: number, userId: number) {
+    const deletedNote = await this.noteRepo.findOne({ where: { id, userId } });
+    return this.noteRepo.remove(deletedNote);
+  }
 }

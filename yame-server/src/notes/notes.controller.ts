@@ -16,6 +16,7 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { UsersService } from 'src/users/users.service';
 
 @Controller('notes')
+@UseGuards(AuthGuard)
 export class NotesController {
   constructor(
     private readonly notesService: NotesService,
@@ -23,7 +24,6 @@ export class NotesController {
   ) { }
 
   @Post()
-  @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.CREATED)
   async create(
     @Request() req,
@@ -39,7 +39,6 @@ export class NotesController {
   }
 
   @Get()
-  @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.OK)
   async findAll(@Request() req) {
     const userId = req?.user?.id;
@@ -69,9 +68,10 @@ export class NotesController {
     return await this.notesService.update(+id, userId, updateNoteDto);
   }
 
-  //
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.notesService.remove(+id);
-  // }
+  @Delete(':id')
+  @HttpCode(HttpStatus.OK)
+  async remove(@Request() req, @Param('id') id: string) {
+    const userId = req?.user?.id;
+    return await this.notesService.remove(+id, userId);
+  }
 }

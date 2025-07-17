@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import axios from "axios";
 
 const AuthContext = createContext<{
-  user: { username: string, id: number } | null;
+  user: { username: string, id: number, token: string } | null;
   login: (username: string, password: string, callback: () => void) => void;
   logout: () => void
 }>(null!);
@@ -11,7 +11,7 @@ const AuthContext = createContext<{
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<{ username: string, id: number } | null>(null);
+  const [user, setUser] = useState<{ username: string, id: number, token: string } | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       .then((res) => res.data)
       .then((resData) => {
         const data = resData.data as { id: number, username: string };
-        setUser({ id: data.id, username: data.username })
+        setUser({ id: data.id, username: data.username, token: token || "" })
       })
       .catch((err) => {
         console.log(err)
@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       .then((res) => res.data)
       .then((resData) => {
         const data = resData.data as { id: number, username: string, accessToken: string };
-        setUser({ id: data.id, username: data.username })
+        setUser({ id: data.id, username: data.username, token: data.accessToken })
         localStorage.setItem("accessToken", data.accessToken)
         callback()
       })
